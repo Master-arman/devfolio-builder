@@ -1,9 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Remove any accidental quotes the user might have added in Vercel
+const cleanUrl = (import.meta.env.VITE_SUPABASE_URL || '').replace(/^["']|["']$/g, '');
+const cleanKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').replace(/^["']|["']$/g, '');
 
-// Only initialize if both URL and Key are present to prevent app from crashing
-export const supabase = (supabaseUrl && supabaseAnonKey) 
-  ? createClient(supabaseUrl, supabaseAnonKey) 
-  : null;
+let client = null;
+
+try {
+  if (cleanUrl && cleanKey) {
+    client = createClient(cleanUrl, cleanKey);
+  }
+} catch (err) {
+  console.error("Failed to initialize Supabase client. Please check your environment variables.", err);
+}
+
+export const supabase = client;
