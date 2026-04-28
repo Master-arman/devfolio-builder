@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "postinstall": "cd server && npm install",
     "dev": "vite",
     "dev:server": "cd server && npm run dev",
     "dev:all": "concurrently -n \"FRONTEND,BACKEND\" -c \"cyan,green\" \"npm run dev\" \"npm run dev:server\"",
