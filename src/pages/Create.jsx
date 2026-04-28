@@ -197,6 +197,10 @@ export default function Create() {
 
 /* ===== Image Upload Helper ===== */
 async function uploadImageToSupabase(file) {
+  if (!supabase) {
+    throw new Error('Supabase is not configured! Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your environment variables.');
+  }
+
   const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
   
   const { data, error } = await supabase.storage
