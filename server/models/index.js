@@ -9,8 +9,8 @@ const Experience = require('./Experience');
 const Certification = require('./Certification');
 
 // Associations
-User.hasOne(Portfolio, { foreignKey: 'userId', onDelete: 'CASCADE' });
-Portfolio.belongsTo(User, { foreignKey: 'userId' });
+// User.hasOne(Portfolio, { foreignKey: 'userId', onDelete: 'CASCADE' });
+// Portfolio.belongsTo(User, { foreignKey: 'userId' });
 
 Portfolio.hasMany(Skill, { foreignKey: 'portfolioId', as: 'skills', onDelete: 'CASCADE' });
 Skill.belongsTo(Portfolio, { foreignKey: 'portfolioId' });
