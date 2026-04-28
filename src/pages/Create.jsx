@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePortfolio } from '../context/PortfolioContext';
 import LivePreview from '../components/LivePreview';
+import { supabase } from '../supabaseClient';
 import './Create.css';
 
 const TABS = [
@@ -195,21 +196,26 @@ export default function Create() {
 }
 
 /* ===== Image Upload Helper ===== */
-async function uploadImageToServer(file) {
-  const formData = new FormData();
-  formData.append('image', file);
+async function uploadImageToSupabase(file) {
+  const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
   
-  const res = await fetch('/api/portfolio/upload-image', {
-    method: 'POST',
-    body: formData,
-  });
-  
-  if (!res.ok) {
-    throw new Error('Image upload failed');
+  const { data, error } = await supabase.storage
+    .from('portfolio-images')
+    .upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (error) {
+    throw error;
   }
-  
-  const data = await res.json();
-  return data.url;
+
+  // Get public URL
+  const { data: { publicUrl } } = supabase.storage
+    .from('portfolio-images')
+    .getPublicUrl(fileName);
+
+  return publicUrl;
 }
 
 /* ===== Profile Tab ===== */
@@ -223,7 +229,7 @@ function ProfileTab({ data, onChange }) {
 
     setUploading(true);
     try {
-      const imageUrl = await uploadImageToServer(file);
+      const imageUrl = await uploadImageToSupabase(file);
       onChange('avatar', imageUrl);
     } catch (err) {
       console.error('Upload failed:', err);
@@ -537,7 +543,7 @@ function ProjectsTab({ projects, onAdd, onRemove }) {
 
     setUploading(true);
     try {
-      const imageUrl = await uploadImageToServer(file);
+      const imageUrl = await uploadImageToSupabase(file);
       setForm(p => ({ ...p, image: imageUrl }));
     } catch (err) {
       console.error('Upload failed:', err);
