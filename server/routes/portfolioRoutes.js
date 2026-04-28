@@ -6,9 +6,16 @@ const path = require('path');
 const fs = require('fs');
 
 // --- LOCAL STORAGE CONFIGURATION ---
-const uploadDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+// On Vercel, the file system is read-only except for /tmp.
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL === 'true' || process.env.NODE_ENV === 'production';
+const uploadDir = isVercel ? path.join('/tmp', 'uploads') : path.join(__dirname, '..', 'uploads');
+
+try {
+  if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (err) {
+  console.warn('Could not create upload directory:', err.message);
 }
 
 const storage = multer.diskStorage({
