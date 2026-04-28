@@ -1,6 +1,7 @@
 const { Sequelize } = require('sequelize');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+require('pg'); // Explicitly require pg so Vercel's bundler includes it for Sequelize
 
 let sequelize;
 
