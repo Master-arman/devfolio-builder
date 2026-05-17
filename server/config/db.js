@@ -1,14 +1,16 @@
 const { Sequelize } = require('sequelize');
 const path = require('path');
+
+// Load .env relative to THIS file's location (works in both local dev & Vercel serverless)
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
-require('pg'); // Explicitly require pg so Vercel's bundler includes it for Sequelize
+require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') }); // fallback for Vercel root
+
+require('pg'); // Explicitly require pg so Vercel's bundler includes it
 
 let sequelize;
 
-
-
 if (process.env.DATABASE_URL) {
-  console.log('📡 Using DATABASE_URL for Sequelize...');
+  console.log('📡 Using DATABASE_URL (PostgreSQL)...');
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     protocol: 'postgres',
@@ -21,24 +23,21 @@ if (process.env.DATABASE_URL) {
     logging: false,
   });
 } else {
-  if (process.env.VERCEL) {
-    console.warn('⚠️ WARNING: DATABASE_URL is missing in Vercel environment! Falling back to local MySQL (which will fail).');
-  }
+  console.warn('⚠️ DATABASE_URL not found — using local MySQL config.');
   sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
+    process.env.DB_NAME || 'portfolio_db',
+    process.env.DB_USER || 'root',
+    process.env.DB_PASSWORD || '',
     {
-      host: process.env.DB_HOST,
+      host: process.env.DB_HOST || 'localhost',
       dialect: process.env.DB_DIALECT || 'mysql',
       logging: false,
     }
   );
 }
 
-
 sequelize.authenticate()
-  .then(() => console.log(`✅ ${process.env.DATABASE_URL ? 'Cloud PostgreSQL' : 'Local ' + (process.env.DB_DIALECT || 'MySQL')} connected successfully.`))
-  .catch((err) => console.error('❌ Database connection error:', err));
+  .then(() => console.log(`✅ Database connected (${process.env.DATABASE_URL ? 'PostgreSQL/Supabase' : 'Local MySQL'})`))
+  .catch((err) => console.error('❌ Database connection error:', err.message));
 
 module.exports = sequelize;

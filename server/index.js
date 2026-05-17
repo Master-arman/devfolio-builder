@@ -1,8 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+// Load .env from server directory (works locally and on Vercel)
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { sequelize } = require('./models');
+
 
 const authRoutes = require('./routes/authRoutes');
 const portfolioRoutes = require('./routes/portfolioRoutes');
